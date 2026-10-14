@@ -1,0 +1,28 @@
+# Normalize line endings across platforms
+* text=auto
+
+# Source
+*.cs       text diff=csharp
+*.csproj   text
+*.sln      text eol=crlf
+*.slnx     text
+*.json     text
+*.js       text
+*.mjs      text
+*.ts       text
+*.html     text
+*.css      text
+*.md       text
+
+# Scripts / tooling
+*.ps1      text eol=crlf
+*.cmd      text eol=crlf
+
+# Binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+*.woff     binary
+*.woff2    binary

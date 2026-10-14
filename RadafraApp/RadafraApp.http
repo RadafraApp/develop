@@ -1,0 +1,6 @@
+@RadafraApp_HostAddress = http://localhost:5153
+
+GET {{RadafraApp_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
