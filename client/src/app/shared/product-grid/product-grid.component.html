@@ -1,0 +1,28 @@
+@if (actionError()) {
+  <div class="alert">{{ actionError() }}</div>
+}
+
+@if (loading()) {
+  <p class="state">Cargando subastas…</p>
+} @else if (error()) {
+  <div class="state state-error">
+    <p>{{ error() }}</p>
+    <button type="button" (click)="load()">Reintentar</button>
+  </div>
+} @else if (products().length === 0) {
+  <p class="state">Todavía no hay productos en subasta.</p>
+} @else {
+  <div class="grid">
+    @for (product of products(); track product.id) {
+      <app-product-card
+        [product]="product"
+        [editable]="editable"
+        [biddable]="biddable"
+        [deleting]="deletingId() === product.id"
+        (delete)="onDelete($event)"
+        (bid)="bid.emit($event)"
+        (viewBids)="viewBids.emit($event)"
+      />
+    }
+  </div>
+}

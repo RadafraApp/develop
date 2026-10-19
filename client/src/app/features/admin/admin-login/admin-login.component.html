@@ -1,0 +1,29 @@
+<div class="backdrop">
+  <div class="dialog" role="dialog" aria-modal="true" aria-label="Acceso a administración">
+    <h2>Acceso a administración</h2>
+    <p class="subtitle">Introduce el código para gestionar las subastas.</p>
+
+    <form (submit)="submit(); $event.preventDefault()">
+      <label for="adminCode">Código de acceso</label>
+      <input
+        #codeInput
+        id="adminCode"
+        type="password"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        [value]="value()"
+        (input)="onInput($event)"
+      />
+
+      @if (errorMessage()) {
+        <p class="error">{{ errorMessage() }}</p>
+      }
+
+      <div class="actions">
+        <button type="button" class="btn-cancel" (click)="goHome()">Cancelar</button>
+        <button type="submit" class="btn-enter">Entrar</button>
+      </div>
+    </form>
+  </div>
+</div>

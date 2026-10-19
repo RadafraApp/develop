@@ -1,0 +1,72 @@
+<div class="backdrop" (click)="onBackdrop($event)">
+  <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Pujas de ' + product.name">
+    <button type="button" class="close" aria-label="Cerrar" (click)="close()">×</button>
+
+    <h2>Pujas de «{{ product.name }}»</h2>
+
+    @if (loading()) {
+      <p class="state">Cargando pujas…</p>
+    } @else if (error()) {
+      <div class="state state-error">
+        <p>{{ error() }}</p>
+        <button type="button" class="retry" (click)="load()">Reintentar</button>
+      </div>
+    } @else if (bids().length === 0) {
+      <p class="state">Todavía no hay pujas para este producto.</p>
+    } @else {
+      @if (actionError()) {
+        <p class="state state-error">{{ actionError() }}</p>
+      }
+      <div class="table-wrap">
+        <table class="bids">
+          <thead>
+            <tr>
+              <th>Teléfono</th>
+              <th class="num">Puja</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (bid of bids(); track bid.id) {
+              <tr>
+                <td>{{ bid.phone }}</td>
+                <td class="num">{{ bid.amount | currency: 'EUR' }}</td>
+                <td class="actions">
+                  @if (confirmingId() === bid.id) {
+                    <div class="confirm">
+                      <button
+                        type="button"
+                        class="btn-danger"
+                        [disabled]="deletingId() === bid.id"
+                        (click)="confirmDelete(bid)"
+                      >
+                        {{ deletingId() === bid.id ? 'Borrando…' : 'Sí, borrar' }}
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-cancel"
+                        [disabled]="deletingId() === bid.id"
+                        (click)="cancelDelete()"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn-row-delete"
+                      [disabled]="deletingId() !== null"
+                      (click)="askDelete(bid)"
+                    >
+                      Eliminar
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

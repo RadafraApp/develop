@@ -1,0 +1,16 @@
+<section class="auctions">
+  <header class="auctions-head">
+    <h1>Subastas en curso</h1>
+    <p class="subtitle">Explora los productos disponibles y su puja inicial.</p>
+  </header>
+
+  @if (notice()) {
+    <p class="notice">{{ notice() }}</p>
+  }
+
+  <app-product-grid [biddable]="true" (bid)="onBid($event)" />
+
+  @if (bidTarget(); as target) {
+    <app-bid-dialog [product]="target" (closed)="onBidClosed()" (placed)="onBidPlaced($event)" />
+  }
+</section>

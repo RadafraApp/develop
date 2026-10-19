@@ -1,0 +1,110 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 380px;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+}
+
+h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  color: #111827;
+}
+
+.subtitle {
+  margin: 0 0 1.1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.error {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.actions {
+  margin-top: 1.25rem;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.actions button {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #6b7280;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+}
+
+.btn-enter {
+  border: none;
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.btn-enter:hover {
+  background: #4338ca;
+}
+
+@media (max-width: 640px) {
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .dialog {
+    max-width: 100%;
+    border-radius: 14px 14px 0 0;
+    padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
+  }
+}

@@ -8,7 +8,7 @@ const target = env.ASPNETCORE_HTTPS_PORT
 
 const PROXY_CONFIG = [
   {
-    context: ['/weatherforecast', '/api'],
+    context: ['/weatherforecast', '/api', '/uploads'],
     target,
     secure: false,
     changeOrigin: true,

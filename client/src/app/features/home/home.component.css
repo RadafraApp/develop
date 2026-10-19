@@ -1,0 +1,33 @@
+.auctions-head {
+  margin-bottom: 1.5rem;
+}
+
+.auctions-head h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #1f2937;
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+}
+
+.notice {
+  margin: 1.25rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .auctions-head {
+    margin-bottom: 1.25rem;
+  }
+
+  .auctions-head h1 {
+    font-size: 1.4rem;
+  }
+}

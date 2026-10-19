@@ -1,0 +1,61 @@
+<div class="backdrop" (click)="onBackdrop($event)">
+  <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Pujar por ' + product.name">
+    <button type="button" class="close" aria-label="Cerrar" (click)="close()">×</button>
+
+    <h2>Pujar por «{{ product.name }}»</h2>
+
+    <p class="current">
+      @if (product.bidCount > 0) {
+        Puja actual: <strong>{{ product.currentPrice | currency: 'EUR' }}</strong>
+        <span class="count">({{ product.bidCount }} {{ product.bidCount === 1 ? 'puja' : 'pujas' }})</span>
+      } @else {
+        Precio inicial: <strong>{{ product.startingPrice | currency: 'EUR' }}</strong>
+      }
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label for="bidPhone">Teléfono de contacto</label>
+      <input
+        #phoneInput
+        id="bidPhone"
+        type="tel"
+        inputmode="tel"
+        formControlName="phone"
+        autocomplete="tel"
+        placeholder="+34 600 000 000"
+      />
+      @if (phoneError()) {
+        <p class="error">{{ phoneError() }}</p>
+      }
+
+      <label for="bidAmount">Tu puja (€)</label>
+      <input
+        id="bidAmount"
+        type="text"
+        inputmode="decimal"
+        formControlName="amount"
+        autocomplete="off"
+        placeholder="0.00"
+      />
+
+      <div class="quick">
+        <button type="button" class="quick-btn" [disabled]="submitting()" (click)="quickAdd(0.5)">+ 0,50</button>
+        <button type="button" class="quick-btn" [disabled]="submitting()" (click)="quickAdd(1)">+ 1</button>
+        <button type="button" class="quick-btn" [disabled]="submitting()" (click)="quickAdd(5)">+ 5</button>
+      </div>
+
+      <p class="hint">Mínimo: {{ minimum | currency: 'EUR' }} · Múltiplos de 0,50 €</p>
+
+      @if (errorMessage()) {
+        <p class="error">{{ errorMessage() }}</p>
+      }
+
+      <div class="actions">
+        <button type="button" class="btn-cancel" [disabled]="submitting()" (click)="close()">Cancelar</button>
+        <button type="submit" class="btn-bid" [disabled]="submitting()">
+          {{ submitting() ? 'Enviando…' : 'Pujar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

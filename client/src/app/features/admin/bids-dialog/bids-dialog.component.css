@@ -1,0 +1,178 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.dialog {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+}
+
+.close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  color: #111827;
+  padding-right: 2rem;
+}
+
+.state {
+  margin: 0;
+  color: #6b7280;
+}
+
+.state-error {
+  color: #b91c1c;
+}
+
+.retry {
+  margin-top: 0.6rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table.bids {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.bids th,
+table.bids td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eef0f3;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+table.bids th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+  background: #f9fafb;
+}
+
+table.bids .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+table.bids .actions-col,
+table.bids .actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+table.bids .confirm {
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+.btn-row-delete,
+.btn-danger,
+.btn-cancel {
+  min-height: 34px;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-row-delete {
+  border-color: #fecaca;
+  background: #ffffff;
+  color: #b91c1c;
+}
+
+.btn-row-delete:hover {
+  background: #fef2f2;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-cancel {
+  border-color: #d1d5db;
+  background: #ffffff;
+  color: #374151;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+}
+
+.btn-row-delete:disabled,
+.btn-danger:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+table.bids tbody tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .dialog {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 14px 14px 0 0;
+    padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
+  }
+}

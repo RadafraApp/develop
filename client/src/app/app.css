@@ -1,0 +1,46 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+  height: 64px;
+  border-bottom: 1px solid #e2e5ea;
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #1f2937;
+  text-decoration: none;
+}
+
+.app-main {
+  flex: 1;
+  padding: 2rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    height: 56px;
+    padding: 0 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .app-main {
+    padding: 1.25rem 1rem calc(1.5rem + env(safe-area-inset-bottom));
+  }
+}

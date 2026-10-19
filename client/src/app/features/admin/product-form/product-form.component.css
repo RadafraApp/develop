@@ -1,0 +1,190 @@
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e2e5ea;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  margin: 1rem 0;
+  color: #4b5563;
+}
+
+.hint {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.page-head {
+  margin-bottom: 1.5rem;
+}
+
+.page-head h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.banner {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.banner-success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.banner-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.field input[type='text'],
+.field input[type='number'],
+.field input[type='datetime-local'] {
+  min-height: 48px;
+  padding: 0 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1f2937;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.field input[type='file'] {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: 20px;
+  height: 20px;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+.preview {
+  display: block;
+  margin-top: 0.5rem;
+  width: 100%;
+  max-width: 287px;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #e2e5ea;
+  object-fit: cover;
+}
+
+.actions {
+  margin-top: 0.5rem;
+}
+
+.actions button {
+  min-height: 48px;
+  padding: 0 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.actions button:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 1.25rem 1rem;
+    border-radius: 10px;
+  }
+
+  .page-head h1 {
+    font-size: 1.3rem;
+  }
+
+  .preview {
+    max-width: 100%;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}

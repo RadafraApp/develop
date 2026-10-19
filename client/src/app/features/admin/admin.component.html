@@ -1,0 +1,5 @@
+@if (auth.authenticated()) {
+  <router-outlet />
+} @else {
+  <app-admin-login />
+}

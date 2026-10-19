@@ -1,0 +1,15 @@
+<section class="admin">
+  <header class="admin-head">
+    <div>
+      <h1>Administración de productos</h1>
+      <p class="subtitle">Gestiona las subastas: edita un producto o añade uno nuevo.</p>
+    </div>
+    <a class="btn-primary" routerLink="/admin/products/new">Nuevo producto</a>
+  </header>
+
+  <app-product-grid [editable]="true" (viewBids)="onViewBids($event)" />
+
+  @if (bidsTarget(); as target) {
+    <app-bids-dialog [product]="target" (closed)="onBidsClosed()" (changed)="onBidsChanged()" />
+  }
+</section>

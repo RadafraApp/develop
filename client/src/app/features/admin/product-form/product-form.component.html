@@ -1,0 +1,120 @@
+<section class="page">
+  <a class="back" routerLink="/admin">← Volver a la lista</a>
+
+  <header class="page-head">
+    <h1>{{ isEditMode ? 'Editar producto' : 'Nuevo producto en subasta' }}</h1>
+    <p class="subtitle">Área de administración</p>
+  </header>
+
+  @if (successMessage()) {
+    <div class="banner banner-success">{{ successMessage() }}</div>
+  }
+  @if (errorMessage()) {
+    <div class="banner banner-error">{{ errorMessage() }}</div>
+  }
+
+  @if (loading()) {
+    <p class="loading">Cargando producto…</p>
+  } @else {
+    <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="name">Nombre del producto</label>
+        <input id="name" type="text" formControlName="name" maxlength="200" autocomplete="off" />
+        @if (controlError('name'); as error) {
+          <span class="error">{{ error }}</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="image">
+          Imagen
+          @if (isEditMode) {
+            <span class="hint">(déjalo vacío para mantener la actual)</span>
+          }
+        </label>
+        <input id="image" type="file" accept="image/*" (change)="onFileSelected($event)" />
+        @if (serverErrors()['image']?.[0]; as error) {
+          <span class="error">{{ error }}</span>
+        }
+        @if (imagePreview()) {
+          <img class="preview" [src]="imagePreview()" alt="Previsualización del producto" />
+        }
+      </div>
+
+      <div class="field">
+        <label for="startingPrice">Precio inicial de la puja (€)</label>
+        <input
+          id="startingPrice"
+          type="text"
+          inputmode="decimal"
+          formControlName="startingPrice"
+          placeholder="0.00"
+          autocomplete="off"
+        />
+        @if (controlError('startingPrice'); as error) {
+          <span class="error">{{ error }}</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="publisher">Editorial</label>
+        <input id="publisher" type="text" formControlName="publisher" maxlength="200" autocomplete="off" />
+        @if (controlError('publisher'); as error) {
+          <span class="error">{{ error }}</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="collection">Colección</label>
+        <input id="collection" type="text" formControlName="collection" maxlength="200" autocomplete="off" />
+        @if (controlError('collection'); as error) {
+          <span class="error">{{ error }}</span>
+        }
+      </div>
+
+      <div class="field">
+        <label class="checkbox">
+          <input type="checkbox" formControlName="isNumbered" />
+          <span>Es numerada</span>
+        </label>
+      </div>
+
+      @if (form.controls.isNumbered.value) {
+        <div class="field">
+          <label for="numbering">Numeración</label>
+          <input
+            id="numbering"
+            type="text"
+            formControlName="numbering"
+            maxlength="100"
+            placeholder="Ej. 123/500"
+            autocomplete="off"
+          />
+          @if (controlError('numbering'); as error) {
+            <span class="error">{{ error }}</span>
+          }
+        </div>
+      }
+
+      <div class="field">
+        <label for="auctionEndTime">Fin de la subasta</label>
+        <input id="auctionEndTime" type="datetime-local" formControlName="auctionEndTime" />
+        @if (controlError('auctionEndTime'); as error) {
+          <span class="error">{{ error }}</span>
+        }
+      </div>
+
+      <div class="actions">
+        <button type="submit" [disabled]="submitting()">
+          {{
+            submitting()
+              ? 'Guardando…'
+              : isEditMode
+                ? 'Guardar cambios'
+                : 'Crear producto'
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

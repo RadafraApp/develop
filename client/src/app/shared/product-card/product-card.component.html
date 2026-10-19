@@ -1,0 +1,53 @@
+<article class="card">
+  <div class="thumb">
+    <img [src]="product.imagePath" [alt]="product.name" loading="lazy" />
+    <span class="badge" [class.badge-ended]="isEnded(product)">
+      {{ isEnded(product) ? 'Finalizada' : 'En subasta' }}
+    </span>
+  </div>
+  <div class="body">
+    <h2 class="name">{{ product.name }}</h2>
+    <p class="meta">{{ product.publisher }} · {{ product.collection }}</p>
+    @if (product.isNumbered && product.numbering) {
+      <p class="meta">Numerada: {{ product.numbering }}</p>
+    }
+    @if (product.bidCount > 0) {
+      <p class="price">
+        Puja actual: <strong>{{ product.currentPrice | currency: 'EUR' }}</strong>
+        <span class="count">({{ product.bidCount }} {{ product.bidCount === 1 ? 'puja' : 'pujas' }})</span>
+      </p>
+    } @else {
+      <p class="price">
+        Puja inicial: <strong>{{ product.startingPrice | currency: 'EUR' }}</strong>
+      </p>
+    }
+    <p class="ends">Finaliza: {{ product.auctionEndTime | date: 'short' }}</p>
+
+    @if (editable) {
+      <div class="card-actions">
+        <a class="btn-edit" [routerLink]="['/admin/products', product.id, 'edit']">Editar</a>
+
+        <button type="button" class="btn-bids" (click)="viewBids.emit(product)">Ver pujas</button>
+
+        @if (confirming()) {
+          <span class="confirm">
+            <button type="button" class="btn-danger" [disabled]="deleting" (click)="confirmDelete()">
+              {{ deleting ? 'Borrando…' : 'Sí, borrar' }}
+            </button>
+            <button type="button" class="btn-cancel" [disabled]="deleting" (click)="confirming.set(false)">
+              Cancelar
+            </button>
+          </span>
+        } @else {
+          <button type="button" class="btn-delete" (click)="confirming.set(true)">Borrar</button>
+        }
+      </div>
+    } @else if (biddable) {
+      <div class="card-actions">
+        <button type="button" class="btn-bid" [disabled]="isEnded(product)" (click)="bid.emit(product)">
+          Pujar
+        </button>
+      </div>
+    }
+  </div>
+</article>
