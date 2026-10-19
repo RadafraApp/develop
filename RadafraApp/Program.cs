@@ -6,6 +6,14 @@ using RadafraApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Outside development (Docker/Render) listen on the host-provided port.
+// Render sets PORT; fall back to 8080 for a plain `docker run`.
+if (!builder.Environment.IsDevelopment())
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 // Parse numbers/dates with the invariant culture (API contract is culture-independent,
 // otherwise a client-sent "19.99" is read as 1999 under a comma-decimal OS culture).
 builder.Services.Configure<RequestLocalizationOptions>(options =>
@@ -39,7 +47,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseRequestLocalization();
 
-app.UseHttpsRedirection();
+// The host (Render) terminates TLS, so only redirect in local development.
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

@@ -1,0 +1,12 @@
+.git
+.gitignore
+.gitattributes
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/.angular
+RadafraApp/wwwroot/uploads
+**/*.md
+.vscode
+.vs
