@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
 
 import { Product } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product.service';
@@ -15,6 +15,7 @@ export class ProductGridComponent {
 
   @Input() editable = false;
   @Input() biddable = false;
+  @Input() hideEnded = false;
   @Output() bid = new EventEmitter<Product>();
   @Output() viewBids = new EventEmitter<Product>();
 
@@ -24,8 +25,16 @@ export class ProductGridComponent {
   readonly actionError = signal<string | null>(null);
   readonly deletingId = signal<number | null>(null);
 
+  readonly visibleProducts = computed(() =>
+    this.hideEnded ? this.products().filter((product) => !this.isEnded(product)) : this.products(),
+  );
+
   constructor() {
     this.load();
+  }
+
+  isEnded(product: Product): boolean {
+    return new Date(product.auctionEndTime).getTime() <= Date.now();
   }
 
   load(): void {

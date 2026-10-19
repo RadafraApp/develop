@@ -68,6 +68,52 @@ h2 {
   cursor: pointer;
 }
 
+.group {
+  margin-top: 1.25rem;
+}
+
+.group:first-of-type {
+  margin-top: 0;
+}
+
+h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.group .state {
+  font-size: 0.88rem;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.pager button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pager button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pager span {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -125,5 +171,9 @@ table.bids tbody tr:last-child td {
     max-height: 90vh;
     border-radius: 14px 14px 0 0;
     padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
+  }
+
+  .pager button {
+    min-height: 40px;
   }
 }

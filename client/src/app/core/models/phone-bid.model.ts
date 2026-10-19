@@ -3,4 +3,5 @@ export interface PhoneBid {
   productName: string;
   imagePath: string;
   amount: number;
+  auctionEndTime: string;
 }

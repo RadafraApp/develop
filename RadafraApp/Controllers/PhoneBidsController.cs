@@ -39,7 +39,7 @@ namespace RadafraApp.Controllers
 
             var products = await _db.Products
                 .Where(p => productIds.Contains(p.Id))
-                .Select(p => new { p.Id, p.Name, HasImage = p.ImageData != null, p.ImageUpdatedAt })
+                .Select(p => new { p.Id, p.Name, HasImage = p.ImageData != null, p.ImageUpdatedAt, p.AuctionEndTime })
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -56,7 +56,8 @@ namespace RadafraApp.Controllers
                         ProductId = product.Id,
                         ProductName = product.Name,
                         ImagePath = ImageUrl(product.Id, product.HasImage, product.ImageUpdatedAt),
-                        Amount = g.Max(b => b.Amount)
+                        Amount = g.Max(b => b.Amount),
+                        AuctionEndTime = product.AuctionEndTime
                     };
                 })
                 .OrderByDescending(x => x.Amount)

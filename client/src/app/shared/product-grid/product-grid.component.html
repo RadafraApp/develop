@@ -9,11 +9,13 @@
     <p>{{ error() }}</p>
     <button type="button" (click)="load()">Reintentar</button>
   </div>
-} @else if (products().length === 0) {
-  <p class="state">Todavía no hay productos en subasta.</p>
+} @else if (visibleProducts().length === 0) {
+  <p class="state">
+    {{ hideEnded ? 'No hay subastas en curso.' : 'Todavía no hay productos en subasta.' }}
+  </p>
 } @else {
   <div class="grid">
-    @for (product of products(); track product.id) {
+    @for (product of visibleProducts(); track product.id) {
       <app-product-card
         [product]="product"
         [editable]="editable"

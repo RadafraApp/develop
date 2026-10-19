@@ -14,28 +14,87 @@
     } @else if (bids().length === 0) {
       <p class="state">No se han encontrado pujas para este teléfono.</p>
     } @else {
-      <div class="table-wrap">
-        <table class="bids">
-          <thead>
-            <tr>
-              <th>Nombre Cromo</th>
-              <th>Foto Cromo</th>
-              <th class="num">Puja actual</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (bid of bids(); track bid.productId) {
-              <tr>
-                <td class="name">{{ bid.productName }}</td>
-                <td>
-                  <img class="thumb" [src]="bid.imagePath" [alt]="bid.productName" loading="lazy" />
-                </td>
-                <td class="num">{{ bid.amount | currency: 'EUR' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <section class="group">
+        <h3>Subastas en curso</h3>
+
+        @if (activeBids().length === 0) {
+          <p class="state">No tienes pujas en subastas en curso.</p>
+        } @else {
+          <div class="table-wrap">
+            <table class="bids">
+              <thead>
+                <tr>
+                  <th>Nombre Cromo</th>
+                  <th>Foto Cromo</th>
+                  <th class="num">Puja actual</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (bid of activePageItems(); track bid.productId) {
+                  <tr>
+                    <td class="name">{{ bid.productName }}</td>
+                    <td>
+                      <img class="thumb" [src]="bid.imagePath" [alt]="bid.productName" loading="lazy" />
+                    </td>
+                    <td class="num">{{ bid.amount | currency: 'EUR' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pager">
+            <button type="button" [disabled]="activePage() === 1" (click)="prevActive()">Anterior</button>
+            <span>Página {{ activePage() }} de {{ activeTotalPages() }}</span>
+            <button
+              type="button"
+              [disabled]="activePage() === activeTotalPages()"
+              (click)="nextActive()"
+            >
+              Siguiente
+            </button>
+          </div>
+        }
+      </section>
+
+      <section class="group">
+        <h3>Subastas finalizadas</h3>
+
+        @if (endedBids().length === 0) {
+          <p class="state">No tienes pujas en subastas finalizadas.</p>
+        } @else {
+          <div class="table-wrap">
+            <table class="bids">
+              <thead>
+                <tr>
+                  <th>Nombre Cromo</th>
+                  <th>Foto Cromo</th>
+                  <th class="num">Puja actual</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (bid of endedPageItems(); track bid.productId) {
+                  <tr>
+                    <td class="name">{{ bid.productName }}</td>
+                    <td>
+                      <img class="thumb" [src]="bid.imagePath" [alt]="bid.productName" loading="lazy" />
+                    </td>
+                    <td class="num">{{ bid.amount | currency: 'EUR' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pager">
+            <button type="button" [disabled]="endedPage() === 1" (click)="prevEnded()">Anterior</button>
+            <span>Página {{ endedPage() }} de {{ endedTotalPages() }}</span>
+            <button type="button" [disabled]="endedPage() === endedTotalPages()" (click)="nextEnded()">
+              Siguiente
+            </button>
+          </div>
+        }
+      </section>
     }
   </div>
 </div>
