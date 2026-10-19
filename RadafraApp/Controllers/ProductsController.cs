@@ -14,11 +14,12 @@ namespace RadafraApp.Controllers
         private const long MaxImageBytes = 5 * 1024 * 1024;
         private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 
-        private static readonly Expression<Func<Product, ProductDto>> Projection = p => new ProductDto
+        private static readonly Expression<Func<Product, ProductView>> Projection = p => new ProductView
         {
             Id = p.Id,
             Name = p.Name,
-            ImagePath = p.ImagePath,
+            HasImage = p.ImageData != null,
+            ImageUpdatedAt = p.ImageUpdatedAt,
             StartingPrice = p.StartingPrice,
             CurrentPrice = p.Bids.Any() ? p.Bids.Max(b => b.Amount) : p.StartingPrice,
             BidCount = p.Bids.Count(),
@@ -30,12 +31,10 @@ namespace RadafraApp.Controllers
         };
 
         private readonly ApplicationDbContext _db;
-        private readonly IWebHostEnvironment _env;
 
-        public ProductsController(ApplicationDbContext db, IWebHostEnvironment env)
+        public ProductsController(ApplicationDbContext db)
         {
             _db = db;
-            _env = env;
         }
 
         [HttpGet]
@@ -47,7 +46,7 @@ namespace RadafraApp.Controllers
                 .AsNoTracking()
                 .ToListAsync();
 
-            return Ok(products);
+            return Ok(products.Select(ToDto));
         }
 
         [HttpGet("{id:int}")]
@@ -59,7 +58,25 @@ namespace RadafraApp.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-            return product is null ? NotFound() : Ok(product);
+            return product is null ? NotFound() : Ok(ToDto(product));
+        }
+
+        [HttpGet("{id:int}/image")]
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> GetImage(int id)
+        {
+            var image = await _db.Products
+                .Where(p => p.Id == id)
+                .Select(p => new { p.ImageData, p.ImageContentType })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (image?.ImageData is not { Length: > 0 })
+            {
+                return NotFound();
+            }
+
+            return File(image.ImageData, image.ImageContentType ?? "application/octet-stream");
         }
 
         [HttpPost]
@@ -90,12 +107,13 @@ namespace RadafraApp.Controllers
             }
 
             var extension = Path.GetExtension(dto.Image!.FileName).ToLowerInvariant();
-            var imagePath = await SaveImageAsync(dto.Image, extension);
 
             var product = new Product
             {
                 Name = dto.Name.Trim(),
-                ImagePath = imagePath,
+                ImageData = await ReadImageAsync(dto.Image),
+                ImageContentType = ContentTypeFor(extension),
+                ImageUpdatedAt = DateTimeOffset.UtcNow,
                 StartingPrice = dto.StartingPrice,
                 Publisher = dto.Publisher.Trim(),
                 Collection = dto.Collection.Trim(),
@@ -145,9 +163,9 @@ namespace RadafraApp.Controllers
             if (dto.Image is { Length: > 0 })
             {
                 var extension = Path.GetExtension(dto.Image.FileName).ToLowerInvariant();
-                var newImagePath = await SaveImageAsync(dto.Image, extension);
-                DeleteImage(product.ImagePath);
-                product.ImagePath = newImagePath;
+                product.ImageData = await ReadImageAsync(dto.Image);
+                product.ImageContentType = ContentTypeFor(extension);
+                product.ImageUpdatedAt = DateTimeOffset.UtcNow;
             }
 
             product.Name = dto.Name.Trim();
@@ -177,50 +195,51 @@ namespace RadafraApp.Controllers
                 return NotFound();
             }
 
-            DeleteImage(product.ImagePath);
             _db.Products.Remove(product);
             await _db.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private async Task<string> SaveImageAsync(IFormFile image, string extension)
+        private static async Task<byte[]> ReadImageAsync(IFormFile image)
         {
-            var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-            var uploadsDir = Path.Combine(webRoot, "uploads", "products");
-            Directory.CreateDirectory(uploadsDir);
-
-            var fileName = $"{Guid.NewGuid():N}{extension}";
-            var fullPath = Path.Combine(uploadsDir, fileName);
-
-            await using var stream = System.IO.File.Create(fullPath);
-            await image.CopyToAsync(stream);
-
-            return $"/uploads/products/{fileName}";
+            using var memory = new MemoryStream();
+            await image.CopyToAsync(memory);
+            return memory.ToArray();
         }
 
-        private void DeleteImage(string? imagePath)
+        private static string ContentTypeFor(string extension) => extension switch
         {
-            if (string.IsNullOrWhiteSpace(imagePath))
-            {
-                return;
-            }
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream"
+        };
 
-            var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-            var relative = imagePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            var fullPath = Path.Combine(webRoot, relative);
+        private static string ImageUrl(int id, bool hasImage, DateTimeOffset? updatedAt) =>
+            hasImage ? $"/api/products/{id}/image?v={updatedAt?.ToUnixTimeMilliseconds() ?? 0}" : string.Empty;
 
-            if (System.IO.File.Exists(fullPath))
-            {
-                System.IO.File.Delete(fullPath);
-            }
-        }
+        private static ProductDto ToDto(ProductView v) => new()
+        {
+            Id = v.Id,
+            Name = v.Name,
+            ImagePath = ImageUrl(v.Id, v.HasImage, v.ImageUpdatedAt),
+            StartingPrice = v.StartingPrice,
+            CurrentPrice = v.CurrentPrice,
+            BidCount = v.BidCount,
+            Publisher = v.Publisher,
+            Collection = v.Collection,
+            IsNumbered = v.IsNumbered,
+            Numbering = v.Numbering,
+            AuctionEndTime = v.AuctionEndTime
+        };
 
         private static ProductDto ToDto(Product p, decimal currentPrice, int bidCount) => new()
         {
             Id = p.Id,
             Name = p.Name,
-            ImagePath = p.ImagePath,
+            ImagePath = ImageUrl(p.Id, p.ImageData is not null, p.ImageUpdatedAt),
             StartingPrice = p.StartingPrice,
             CurrentPrice = currentPrice,
             BidCount = bidCount,
@@ -230,5 +249,21 @@ namespace RadafraApp.Controllers
             Numbering = p.Numbering,
             AuctionEndTime = p.AuctionEndTime
         };
+
+        private sealed class ProductView
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = string.Empty;
+            public bool HasImage { get; set; }
+            public DateTimeOffset? ImageUpdatedAt { get; set; }
+            public decimal StartingPrice { get; set; }
+            public decimal CurrentPrice { get; set; }
+            public int BidCount { get; set; }
+            public string Publisher { get; set; } = string.Empty;
+            public string Collection { get; set; } = string.Empty;
+            public bool IsNumbered { get; set; }
+            public string? Numbering { get; set; }
+            public DateTimeOffset AuctionEndTime { get; set; }
+        }
     }
 }

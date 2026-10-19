@@ -10,9 +10,17 @@ namespace RadafraApp.Entities
         [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
 
-        [Required]
+        // Legacy file path; retained only to map pre-existing uploads during backfill.
         [MaxLength(500)]
-        public string ImagePath { get; set; } = string.Empty;
+        public string? ImagePath { get; set; }
+
+        // Image bytes are stored in the database so they survive container rebuilds.
+        public byte[]? ImageData { get; set; }
+
+        [MaxLength(100)]
+        public string? ImageContentType { get; set; }
+
+        public DateTimeOffset? ImageUpdatedAt { get; set; }
 
         [Range(0, 1_000_000)]
         public decimal StartingPrice { get; set; }

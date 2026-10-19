@@ -68,10 +68,19 @@ namespace RadafraApp.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("ImageContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<byte[]>("ImageData")
+                        .HasColumnType("bytea");
+
                     b.Property<string>("ImagePath")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset?>("ImageUpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsNumbered")
                         .HasColumnType("boolean");
