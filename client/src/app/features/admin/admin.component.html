@@ -1,4 +1,5 @@
 @if (auth.authenticated()) {
+  <app-admin-navbar />
   <router-outlet />
 } @else {
   <app-admin-login />

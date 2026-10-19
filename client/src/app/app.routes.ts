@@ -18,6 +18,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'ended',
+        loadComponent: () =>
+          import('./features/admin/ended-auctions/ended-auctions.component').then(
+            (m) => m.EndedAuctionsComponent,
+          ),
+      },
+      {
         path: 'products/new',
         loadComponent: () =>
           import('./features/admin/product-form/product-form.component').then(

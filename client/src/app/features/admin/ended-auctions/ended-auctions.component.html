@@ -1,0 +1,68 @@
+<section class="admin">
+  <header class="admin-head">
+    <div>
+      <h1>Subastas finalizadas</h1>
+      <p class="subtitle">Subastas cuya fecha de fin ya ha pasado.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Cargando subastas…</p>
+  } @else if (error()) {
+    <div class="state state-error">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="load()">Reintentar</button>
+    </div>
+  } @else if (products().length === 0) {
+    <p class="state">No hay subastas finalizadas.</p>
+  } @else {
+    <div class="table-wrap">
+      <table class="ended">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Foto</th>
+            <th>Colección</th>
+            <th class="num">Puja final</th>
+            <th class="num">Pujas</th>
+            <th>Finalizó</th>
+            <th class="actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products(); track product.id) {
+            <tr>
+              <td class="name">{{ product.name }}</td>
+              <td>
+                <img class="thumb" [src]="product.imagePath" [alt]="product.name" loading="lazy" />
+              </td>
+              <td>{{ product.publisher }} · {{ product.collection }}</td>
+              <td class="num">{{ product.currentPrice | currency: 'EUR' }}</td>
+              <td class="num">{{ product.bidCount }}</td>
+              <td>{{ product.auctionEndTime | date: 'short' }}</td>
+              <td class="actions">
+                @if (confirmingId() === product.id) {
+                  <span class="confirm">
+                    <button
+                      type="button"
+                      class="btn-danger"
+                      [disabled]="deletingId() === product.id"
+                      (click)="delete(product)"
+                    >
+                      {{ deletingId() === product.id ? 'Borrando…' : 'Sí, borrar' }}
+                    </button>
+                    <button type="button" class="btn-cancel" (click)="cancelDelete()">Cancelar</button>
+                  </span>
+                } @else {
+                  <button type="button" class="btn-delete" (click)="confirmDelete(product)">
+                    Borrar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,21 @@
+<nav class="admin-nav">
+  <a class="brand" routerLink="/admin">Radafra · Administración</a>
+
+  <div class="actions">
+    <a
+      class="nav-btn"
+      routerLink="/admin"
+      [routerLinkActiveOptions]="{ exact: true }"
+      routerLinkActive="active"
+    >
+      Subastas
+    </a>
+    <a class="nav-btn" routerLink="/admin/ended" routerLinkActive="active">
+      Subastas finalizadas
+    </a>
+    <a class="nav-btn" routerLink="/admin/products/new" routerLinkActive="active">
+      Nuevo producto
+    </a>
+    <button type="button" class="nav-btn nav-btn-logout" (click)="logout()">Salir</button>
+  </div>
+</nav>

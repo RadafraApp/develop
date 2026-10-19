@@ -16,6 +16,7 @@ export class ProductGridComponent {
   @Input() editable = false;
   @Input() biddable = false;
   @Input() hideEnded = false;
+  @Input() onlyEnded = false;
   @Output() bid = new EventEmitter<Product>();
   @Output() viewBids = new EventEmitter<Product>();
 
@@ -25,9 +26,16 @@ export class ProductGridComponent {
   readonly actionError = signal<string | null>(null);
   readonly deletingId = signal<number | null>(null);
 
-  readonly visibleProducts = computed(() =>
-    this.hideEnded ? this.products().filter((product) => !this.isEnded(product)) : this.products(),
-  );
+  readonly visibleProducts = computed(() => {
+    const items = this.products();
+    if (this.onlyEnded) {
+      return items.filter((product) => this.isEnded(product));
+    }
+    if (this.hideEnded) {
+      return items.filter((product) => !this.isEnded(product));
+    }
+    return items;
+  });
 
   constructor() {
     this.load();

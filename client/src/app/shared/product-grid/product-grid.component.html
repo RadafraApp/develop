@@ -11,7 +11,13 @@
   </div>
 } @else if (visibleProducts().length === 0) {
   <p class="state">
-    {{ hideEnded ? 'No hay subastas en curso.' : 'Todavía no hay productos en subasta.' }}
+    @if (onlyEnded) {
+      No hay subastas finalizadas.
+    } @else if (hideEnded) {
+      No hay subastas en curso.
+    } @else {
+      Todavía no hay productos en subasta.
+    }
   </p>
 } @else {
   <div class="grid">
