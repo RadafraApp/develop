@@ -1,0 +1,25 @@
+<header class="navbar">
+  <a class="brand" routerLink="/">Radafra</a>
+
+  <form class="my-bids" (submit)="onSearchMyBids($event)" novalidate>
+    <label for="myPhone">Consulta tus pujas por teléfono</label>
+    <div class="my-bids-row">
+      <input
+        #phoneInput
+        id="myPhone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder="600 000 000"
+      />
+      <button type="submit">Ver mis pujas</button>
+    </div>
+    @if (myBidsError()) {
+      <p class="error">{{ myBidsError() }}</p>
+    }
+  </form>
+</header>
+
+@if (myBidsPhone(); as phone) {
+  <app-my-bids-dialog [phone]="phone" (closed)="onMyBidsClosed()" />
+}
