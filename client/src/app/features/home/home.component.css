@@ -22,6 +22,67 @@
   font-weight: 600;
 }
 
+.my-bids {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+}
+
+.my-bids label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.my-bids-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.my-bids-row input {
+  flex: 1;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.my-bids-row input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.my-bids-row button {
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.my-bids-row button:hover {
+  background: #4338ca;
+}
+
+.my-bids .error {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
 @media (max-width: 640px) {
   .auctions-head {
     margin-bottom: 1.25rem;
@@ -29,5 +90,13 @@
 
   .auctions-head h1 {
     font-size: 1.4rem;
+  }
+
+  .my-bids-row {
+    flex-direction: column;
+  }
+
+  .my-bids-row button {
+    width: 100%;
   }
 }

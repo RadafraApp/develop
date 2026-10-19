@@ -1,0 +1,41 @@
+<div class="backdrop" (click)="onBackdrop($event)">
+  <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Pujas del teléfono ' + phone">
+    <button type="button" class="close" aria-label="Cerrar" (click)="close()">×</button>
+
+    <h2>Número de teléfono: {{ phone }} · Pujas</h2>
+
+    @if (loading()) {
+      <p class="state">Cargando pujas…</p>
+    } @else if (error()) {
+      <div class="state state-error">
+        <p>{{ error() }}</p>
+        <button type="button" class="retry" (click)="load()">Reintentar</button>
+      </div>
+    } @else if (bids().length === 0) {
+      <p class="state">No se han encontrado pujas para este teléfono.</p>
+    } @else {
+      <div class="table-wrap">
+        <table class="bids">
+          <thead>
+            <tr>
+              <th>Nombre Cromo</th>
+              <th>Foto Cromo</th>
+              <th class="num">Puja actual</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (bid of bids(); track bid.productId) {
+              <tr>
+                <td class="name">{{ bid.productName }}</td>
+                <td>
+                  <img class="thumb" [src]="bid.imagePath" [alt]="bid.productName" loading="lazy" />
+                </td>
+                <td class="num">{{ bid.amount | currency: 'EUR' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

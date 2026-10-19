@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Bid } from '../models/bid.model';
+import { PhoneBid } from '../models/phone-bid.model';
 import { Product } from '../models/product.model';
 
 @Injectable({ providedIn: 'root' })
@@ -40,5 +41,9 @@ export class ProductService {
 
   deleteBid(productId: number, bidId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${productId}/bids/${bidId}`);
+  }
+
+  getBidsByPhone(phone: string): Observable<PhoneBid[]> {
+    return this.http.get<PhoneBid[]>('/api/bids', { params: { phone } });
   }
 }
