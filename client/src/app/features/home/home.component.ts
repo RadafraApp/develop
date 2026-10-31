@@ -2,12 +2,13 @@ import { Component, ViewChild, signal } from '@angular/core';
 
 import { Bid } from '../../core/models/bid.model';
 import { Product } from '../../core/models/product.model';
+import { AuctionSearchComponent } from '../../shared/auction-search/auction-search.component';
 import { BidDialogComponent } from '../../shared/bid-dialog/bid-dialog.component';
 import { ProductGridComponent } from '../../shared/product-grid/product-grid.component';
 
 @Component({
   selector: 'app-home',
-  imports: [ProductGridComponent, BidDialogComponent],
+  imports: [AuctionSearchComponent, ProductGridComponent, BidDialogComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -16,6 +17,19 @@ export class HomeComponent {
 
   readonly notice = signal<string | null>(null);
   readonly bidTarget = signal<Product | null>(null);
+  readonly filter = signal('');
+
+  onSearch(product: Product): void {
+    this.filter.set(product.name);
+  }
+
+  onFilterInput(value: string): void {
+    this.filter.set(value);
+  }
+
+  clearFilter(): void {
+    this.filter.set('');
+  }
 
   onBid(product: Product): void {
     this.bidTarget.set(product);

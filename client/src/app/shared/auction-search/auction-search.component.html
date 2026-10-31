@@ -1,0 +1,62 @@
+<div class="search">
+  <label class="visually-hidden" for="auctionSearch">Buscar subastas</label>
+
+  <div class="search-field">
+    <svg
+      class="search-icon"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+
+    <input
+      id="auctionSearch"
+      type="search"
+      role="combobox"
+      autocomplete="off"
+      aria-expanded="false"
+      aria-controls="auctionSearchListbox"
+      aria-autocomplete="list"
+      placeholder="Busca una subasta por su título…"
+      [value]="query()"
+      (input)="onInput($any($event.target).value)"
+      (focus)="onFocus()"
+      (keydown)="onKeyDown($event)"
+    />
+  </div>
+
+  @if (showPanel() && suggestions().length > 0) {
+    <ul id="auctionSearchListbox" class="search-panel" role="listbox">
+      @for (item of suggestions(); track item.product.id; let i = $index) {
+        <li
+          class="search-option"
+          role="option"
+          [class.is-active]="i === activeIndex()"
+          [attr.aria-selected]="i === activeIndex()"
+          (mousedown)="$event.preventDefault()"
+          (click)="choose(item.product)"
+          (mouseenter)="activeIndex.set(i)"
+        >
+          <span class="option-title">
+            @for (segment of item.segments; track $index) {
+              @if (segment.match) {
+                <mark>{{ segment.text }}</mark>
+              } @else {
+                {{ segment.text }}
+              }
+            }
+          </span>
+          <span class="option-meta">{{ item.product.collection }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

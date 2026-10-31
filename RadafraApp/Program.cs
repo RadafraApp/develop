@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using RadafraApp.Binding;
 using RadafraApp.Data;
+using RadafraApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,9 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Stateless image decoding/resizing helper.
+builder.Services.AddSingleton<ImageProcessor>();
 
 var app = builder.Build();
 

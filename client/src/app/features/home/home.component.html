@@ -8,7 +8,22 @@
     <p class="notice">{{ notice() }}</p>
   }
 
-  <app-product-grid [biddable]="true" [hideEnded]="true" (bid)="onBid($event)" />
+  <div class="search-row">
+    <app-auction-search [hideEnded]="true" (selected)="onSearch($event)" />
+
+    @if (filter().trim()) {
+      <button type="button" class="clear-filter" (click)="clearFilter()">
+        Limpiar búsqueda ({{ filter().trim() }})
+      </button>
+    }
+  </div>
+
+  <app-product-grid
+    [biddable]="true"
+    [hideEnded]="true"
+    [filter]="filter()"
+    (bid)="onBid($event)"
+  />
 
   @if (bidTarget(); as target) {
     <app-bid-dialog [product]="target" (closed)="onBidClosed()" (placed)="onBidPlaced($event)" />

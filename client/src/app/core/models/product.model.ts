@@ -2,6 +2,7 @@ export interface Product {
   id: number;
   name: string;
   imagePath: string;
+  thumbnailPath: string;
   startingPrice: number;
   currentPrice: number;
   bidCount: number;

@@ -22,6 +22,12 @@ namespace RadafraApp.Entities
 
         public DateTimeOffset? ImageUpdatedAt { get; set; }
 
+        // Small rendition (max 800x600) used by the auction cards and tables.
+        public byte[]? ThumbnailData { get; set; }
+
+        [MaxLength(100)]
+        public string? ThumbnailContentType { get; set; }
+
         [Range(0, 1_000_000)]
         public decimal StartingPrice { get; set; }
 

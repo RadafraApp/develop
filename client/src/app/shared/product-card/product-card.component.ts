@@ -21,6 +21,29 @@ export class ProductCardComponent {
 
   readonly confirming = signal(false);
 
+  // The card first tries the small rendition; if it is missing or broken it falls back
+  // to the full picture, and finally to the "no image" placeholder.
+  private readonly thumbnailFailed = signal(false);
+  private readonly imageFailed = signal(false);
+
+  imageSource(): string {
+    if (!this.thumbnailFailed() && this.product.thumbnailPath) {
+      return this.product.thumbnailPath;
+    }
+    if (!this.imageFailed() && this.product.imagePath) {
+      return this.product.imagePath;
+    }
+    return '';
+  }
+
+  onImageError(): void {
+    if (!this.thumbnailFailed() && this.product.thumbnailPath) {
+      this.thumbnailFailed.set(true);
+      return;
+    }
+    this.imageFailed.set(true);
+  }
+
   isEnded(product: Product): boolean {
     return new Date(product.auctionEndTime).getTime() <= Date.now();
   }

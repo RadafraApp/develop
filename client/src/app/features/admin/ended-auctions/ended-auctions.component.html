@@ -34,7 +34,12 @@
             <tr>
               <td class="name">{{ product.name }}</td>
               <td>
-                <img class="thumb" [src]="product.imagePath" [alt]="product.name" loading="lazy" />
+                <img
+                  class="thumb"
+                  [src]="product.thumbnailPath || product.imagePath"
+                  [alt]="product.name"
+                  loading="lazy"
+                />
               </td>
               <td>{{ product.publisher }} · {{ product.collection }}</td>
               <td class="num">{{ product.currentPrice | currency: 'EUR' }}</td>

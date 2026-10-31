@@ -31,8 +31,32 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* The frame is always 4:3, whatever the picture's real size. The whole image is
+     shown centred ("contain") and neutral bands appear when the ratios differ. */
+  object-fit: contain;
+  object-position: center;
   display: block;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.thumb-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  color: #9ca3af;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.thumb-empty svg {
+  width: 34px;
+  height: 34px;
+  opacity: 0.65;
 }
 
 .badge {

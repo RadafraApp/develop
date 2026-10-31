@@ -8,6 +8,8 @@ namespace RadafraApp.Contracts
 
         public string ImagePath { get; set; } = string.Empty;
 
+        public string ThumbnailPath { get; set; } = string.Empty;
+
         public decimal StartingPrice { get; set; }
 
         public decimal CurrentPrice { get; set; }

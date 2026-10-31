@@ -39,7 +39,14 @@ namespace RadafraApp.Controllers
 
             var products = await _db.Products
                 .Where(p => productIds.Contains(p.Id))
-                .Select(p => new { p.Id, p.Name, HasImage = p.ImageData != null, p.ImageUpdatedAt, p.AuctionEndTime })
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Name,
+                    HasImage = p.ImageData != null,
+                    p.ImageUpdatedAt,
+                    p.AuctionEndTime
+                })
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -56,6 +63,7 @@ namespace RadafraApp.Controllers
                         ProductId = product.Id,
                         ProductName = product.Name,
                         ImagePath = ImageUrl(product.Id, product.HasImage, product.ImageUpdatedAt),
+                        ThumbnailPath = ThumbnailUrl(product.Id, product.HasImage, product.ImageUpdatedAt),
                         Amount = g.Max(b => b.Amount),
                         AuctionEndTime = product.AuctionEndTime
                     };
@@ -69,6 +77,9 @@ namespace RadafraApp.Controllers
 
         private static string ImageUrl(int id, bool hasImage, DateTimeOffset? updatedAt) =>
             hasImage ? $"/api/products/{id}/image?v={updatedAt?.ToUnixTimeMilliseconds() ?? 0}" : string.Empty;
+
+        private static string ThumbnailUrl(int id, bool hasImage, DateTimeOffset? updatedAt) =>
+            hasImage ? $"/api/products/{id}/thumbnail?v={updatedAt?.ToUnixTimeMilliseconds() ?? 0}" : string.Empty;
 
         private static bool TryNormalize(string? phone, out string digits, out string? error)
         {

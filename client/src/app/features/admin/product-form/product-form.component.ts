@@ -194,7 +194,7 @@ export class ProductFormComponent {
           numbering: product.numbering ?? '',
           auctionEndTime: this.toLocalInputValue(product.auctionEndTime),
         });
-        this.imagePreview.set(product.imagePath);
+        this.imagePreview.set(product.thumbnailPath || product.imagePath);
         this.loading.set(false);
       },
       error: () => {

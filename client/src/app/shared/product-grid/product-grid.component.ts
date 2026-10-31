@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, computed, inject, signal } from
 
 import { Product } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product.service';
+import { normalizeText } from '../../core/utils/text';
 import { ProductCardComponent } from '../product-card/product-card.component';
 
 @Component({
@@ -17,6 +18,18 @@ export class ProductGridComponent {
   @Input() biddable = false;
   @Input() hideEnded = false;
   @Input() onlyEnded = false;
+
+  private readonly filterValue = signal('');
+
+  @Input()
+  set filter(value: string) {
+    this.filterValue.set(value ?? '');
+  }
+
+  get filter(): string {
+    return this.filterValue();
+  }
+
   @Output() bid = new EventEmitter<Product>();
   @Output() viewBids = new EventEmitter<Product>();
 
@@ -28,13 +41,22 @@ export class ProductGridComponent {
 
   readonly visibleProducts = computed(() => {
     const items = this.products();
-    if (this.onlyEnded) {
-      return items.filter((product) => this.isEnded(product));
-    }
-    if (this.hideEnded) {
-      return items.filter((product) => !this.isEnded(product));
-    }
-    return items;
+    const needle = normalizeText(this.filterValue().trim());
+
+    const filtered = items.filter((product) => {
+      if (this.onlyEnded && !this.isEnded(product)) {
+        return false;
+      }
+      if (this.hideEnded && this.isEnded(product)) {
+        return false;
+      }
+      if (!needle) {
+        return true;
+      }
+      return normalizeText(product.name).includes(needle);
+    });
+
+    return filtered;
   });
 
   constructor() {

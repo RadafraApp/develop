@@ -34,7 +34,12 @@
                   <tr>
                     <td class="name">{{ bid.productName }}</td>
                     <td>
-                      <img class="thumb" [src]="bid.imagePath" [alt]="bid.productName" loading="lazy" />
+                      <img
+                        class="thumb"
+                        [src]="bid.thumbnailPath || bid.imagePath"
+                        [alt]="bid.productName"
+                        loading="lazy"
+                      />
                     </td>
                     <td class="num">{{ bid.amount | currency: 'EUR' }}</td>
                   </tr>
@@ -77,7 +82,12 @@
                   <tr>
                     <td class="name">{{ bid.productName }}</td>
                     <td>
-                      <img class="thumb" [src]="bid.imagePath" [alt]="bid.productName" loading="lazy" />
+                      <img
+                        class="thumb"
+                        [src]="bid.thumbnailPath || bid.imagePath"
+                        [alt]="bid.productName"
+                        loading="lazy"
+                      />
                     </td>
                     <td class="num">{{ bid.amount | currency: 'EUR' }}</td>
                   </tr>

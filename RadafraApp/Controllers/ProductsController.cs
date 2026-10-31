@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RadafraApp.Contracts;
 using RadafraApp.Data;
 using RadafraApp.Entities;
+using RadafraApp.Services;
 
 namespace RadafraApp.Controllers
 {
@@ -12,6 +13,7 @@ namespace RadafraApp.Controllers
     public class ProductsController : ControllerBase
     {
         private const long MaxImageBytes = 5 * 1024 * 1024;
+
         private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 
         private static readonly Expression<Func<Product, ProductView>> Projection = p => new ProductView
@@ -31,10 +33,12 @@ namespace RadafraApp.Controllers
         };
 
         private readonly ApplicationDbContext _db;
+        private readonly ImageProcessor _imageProcessor;
 
-        public ProductsController(ApplicationDbContext db)
+        public ProductsController(ApplicationDbContext db, ImageProcessor imageProcessor)
         {
             _db = db;
+            _imageProcessor = imageProcessor;
         }
 
         [HttpGet]
@@ -62,21 +66,68 @@ namespace RadafraApp.Controllers
         }
 
         [HttpGet("{id:int}/image")]
-        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
-        public async Task<IActionResult> GetImage(int id)
+        [ResponseCache(Duration = 31_536_000, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> GetImage(int id, CancellationToken cancellationToken)
         {
             var image = await _db.Products
                 .Where(p => p.Id == id)
                 .Select(p => new { p.ImageData, p.ImageContentType })
                 .AsNoTracking()
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (image?.ImageData is not { Length: > 0 })
             {
                 return NotFound();
             }
 
-            return File(image.ImageData, image.ImageContentType ?? "application/octet-stream");
+            return ImageFile(image.ImageData, image.ImageContentType);
+        }
+
+        [HttpGet("{id:int}/thumbnail")]
+        [ResponseCache(Duration = 31_536_000, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> GetThumbnail(int id, CancellationToken cancellationToken)
+        {
+            var image = await _db.Products
+                .Where(p => p.Id == id)
+                .Select(p => new { p.ImageData, p.ThumbnailData, p.ThumbnailContentType })
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (image is null)
+            {
+                return NotFound();
+            }
+
+            if (image.ThumbnailData is { Length: > 0 })
+            {
+                return ImageFile(image.ThumbnailData, image.ThumbnailContentType);
+            }
+
+            if (image.ImageData is not { Length: > 0 })
+            {
+                return NotFound();
+            }
+
+            // Rows created before thumbnails existed get one on first use.
+            EncodedImage thumbnail;
+            try
+            {
+                thumbnail = _imageProcessor.CreateThumbnail(image.ImageData);
+            }
+            catch (InvalidImageException)
+            {
+                return NotFound();
+            }
+
+            await _db.Products
+                .Where(p => p.Id == id && p.ThumbnailData == null)
+                .ExecuteUpdateAsync(
+                    setters => setters
+                        .SetProperty(p => p.ThumbnailData, thumbnail.Data)
+                        .SetProperty(p => p.ThumbnailContentType, thumbnail.ContentType),
+                    cancellationToken);
+
+            return ImageFile(thumbnail.Data, thumbnail.ContentType);
         }
 
         [HttpPost]
@@ -88,17 +139,14 @@ namespace RadafraApp.Controllers
                 ModelState.AddModelError(nameof(dto.Numbering), "La numeración es obligatoria cuando el producto es numerado.");
             }
 
+            ProcessedImage? image = null;
             if (dto.Image is null || dto.Image.Length == 0)
             {
                 ModelState.AddModelError(nameof(dto.Image), "La imagen es obligatoria.");
             }
-            else if (dto.Image.Length > MaxImageBytes)
+            else
             {
-                ModelState.AddModelError(nameof(dto.Image), "La imagen no puede superar los 5 MB.");
-            }
-            else if (!AllowedExtensions.Contains(Path.GetExtension(dto.Image.FileName).ToLowerInvariant()))
-            {
-                ModelState.AddModelError(nameof(dto.Image), $"Formato no permitido. Usa: {string.Join(", ", AllowedExtensions)}.");
+                image = await ProcessUploadAsync(dto.Image, nameof(dto.Image));
             }
 
             if (!ModelState.IsValid)
@@ -106,14 +154,14 @@ namespace RadafraApp.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var extension = Path.GetExtension(dto.Image!.FileName).ToLowerInvariant();
-
             var product = new Product
             {
                 Name = dto.Name.Trim(),
-                ImageData = await ReadImageAsync(dto.Image),
-                ImageContentType = ContentTypeFor(extension),
+                ImageData = image!.Full.Data,
+                ImageContentType = image.Full.ContentType,
                 ImageUpdatedAt = DateTimeOffset.UtcNow,
+                ThumbnailData = image.Thumbnail.Data,
+                ThumbnailContentType = image.Thumbnail.ContentType,
                 StartingPrice = dto.StartingPrice,
                 Publisher = dto.Publisher.Trim(),
                 Collection = dto.Collection.Trim(),
@@ -143,16 +191,10 @@ namespace RadafraApp.Controllers
                 ModelState.AddModelError(nameof(dto.Numbering), "La numeración es obligatoria cuando el producto es numerado.");
             }
 
+            ProcessedImage? image = null;
             if (dto.Image is { Length: > 0 })
             {
-                if (dto.Image.Length > MaxImageBytes)
-                {
-                    ModelState.AddModelError(nameof(dto.Image), "La imagen no puede superar los 5 MB.");
-                }
-                else if (!AllowedExtensions.Contains(Path.GetExtension(dto.Image.FileName).ToLowerInvariant()))
-                {
-                    ModelState.AddModelError(nameof(dto.Image), $"Formato no permitido. Usa: {string.Join(", ", AllowedExtensions)}.");
-                }
+                image = await ProcessUploadAsync(dto.Image, nameof(dto.Image));
             }
 
             if (!ModelState.IsValid)
@@ -160,12 +202,13 @@ namespace RadafraApp.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            if (dto.Image is { Length: > 0 })
+            if (image is not null)
             {
-                var extension = Path.GetExtension(dto.Image.FileName).ToLowerInvariant();
-                product.ImageData = await ReadImageAsync(dto.Image);
-                product.ImageContentType = ContentTypeFor(extension);
+                product.ImageData = image.Full.Data;
+                product.ImageContentType = image.Full.ContentType;
                 product.ImageUpdatedAt = DateTimeOffset.UtcNow;
+                product.ThumbnailData = image.Thumbnail.Data;
+                product.ThumbnailContentType = image.Thumbnail.ContentType;
             }
 
             product.Name = dto.Name.Trim();
@@ -187,44 +230,62 @@ namespace RadafraApp.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
-            if (product is null)
+            // Bids are removed by the ON DELETE CASCADE constraint.
+            var deleted = await _db.Products
+                .Where(p => p.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return deleted == 0 ? NotFound() : NoContent();
+        }
+
+        private async Task<ProcessedImage?> ProcessUploadAsync(IFormFile image, string modelKey)
+        {
+            if (image.Length > MaxImageBytes)
             {
-                return NotFound();
+                ModelState.AddModelError(modelKey, "La imagen no puede superar los 5 MB.");
+                return null;
             }
 
-            _db.Products.Remove(product);
-            await _db.SaveChangesAsync();
+            var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            if (!AllowedExtensions.Contains(extension))
+            {
+                ModelState.AddModelError(modelKey, $"Formato no permitido. Usa: {string.Join(", ", AllowedExtensions)}.");
+                return null;
+            }
 
-            return NoContent();
+            await using var stream = image.OpenReadStream();
+
+            try
+            {
+                return _imageProcessor.Process(stream);
+            }
+            catch (InvalidImageException ex)
+            {
+                ModelState.AddModelError(modelKey, ex.Message);
+                return null;
+            }
         }
 
-        private static async Task<byte[]> ReadImageAsync(IFormFile image)
+        private IActionResult ImageFile(byte[] data, string? contentType)
         {
-            using var memory = new MemoryStream();
-            await image.CopyToAsync(memory);
-            return memory.ToArray();
+            Response.Headers["X-Content-Type-Options"] = "nosniff";
+            return File(data, contentType ?? "application/octet-stream");
         }
-
-        private static string ContentTypeFor(string extension) => extension switch
-        {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".webp" => "image/webp",
-            ".gif" => "image/gif",
-            _ => "application/octet-stream"
-        };
 
         private static string ImageUrl(int id, bool hasImage, DateTimeOffset? updatedAt) =>
             hasImage ? $"/api/products/{id}/image?v={updatedAt?.ToUnixTimeMilliseconds() ?? 0}" : string.Empty;
+
+        private static string ThumbnailUrl(int id, bool hasImage, DateTimeOffset? updatedAt) =>
+            hasImage ? $"/api/products/{id}/thumbnail?v={updatedAt?.ToUnixTimeMilliseconds() ?? 0}" : string.Empty;
 
         private static ProductDto ToDto(ProductView v) => new()
         {
             Id = v.Id,
             Name = v.Name,
             ImagePath = ImageUrl(v.Id, v.HasImage, v.ImageUpdatedAt),
+            ThumbnailPath = ThumbnailUrl(v.Id, v.HasImage, v.ImageUpdatedAt),
             StartingPrice = v.StartingPrice,
             CurrentPrice = v.CurrentPrice,
             BidCount = v.BidCount,
@@ -240,6 +301,7 @@ namespace RadafraApp.Controllers
             Id = p.Id,
             Name = p.Name,
             ImagePath = ImageUrl(p.Id, p.ImageData is not null, p.ImageUpdatedAt),
+            ThumbnailPath = ThumbnailUrl(p.Id, p.ImageData is not null, p.ImageUpdatedAt),
             StartingPrice = p.StartingPrice,
             CurrentPrice = currentPrice,
             BidCount = bidCount,

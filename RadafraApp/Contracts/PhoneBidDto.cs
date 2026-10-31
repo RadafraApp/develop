@@ -8,6 +8,8 @@ namespace RadafraApp.Contracts
 
         public string ImagePath { get; set; } = string.Empty;
 
+        public string ThumbnailPath { get; set; } = string.Empty;
+
         public decimal Amount { get; set; }
 
         public DateTimeOffset AuctionEndTime { get; set; }
