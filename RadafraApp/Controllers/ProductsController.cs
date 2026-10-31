@@ -25,10 +25,19 @@ namespace RadafraApp.Controllers
             StartingPrice = p.StartingPrice,
             CurrentPrice = p.Bids.Any() ? p.Bids.Max(b => b.Amount) : p.StartingPrice,
             BidCount = p.Bids.Count(),
+            WinnerPhone = p.Bids
+                .OrderByDescending(b => b.Amount)
+                .ThenByDescending(b => b.CreatedAt)
+                .Select(b => b.Phone)
+                .FirstOrDefault(),
             Publisher = p.Publisher,
             Collection = p.Collection,
+            Equipo = p.Equipo,
+            TipoCromo = p.TipoCromo,
             IsNumbered = p.IsNumbered,
             Numbering = p.Numbering,
+            Pagado = p.Pagado,
+            Enviado = p.Enviado,
             AuctionEndTime = p.AuctionEndTime
         };
 
@@ -165,6 +174,8 @@ namespace RadafraApp.Controllers
                 StartingPrice = dto.StartingPrice,
                 Publisher = dto.Publisher.Trim(),
                 Collection = dto.Collection.Trim(),
+                Equipo = dto.Equipo.Trim(),
+                TipoCromo = dto.TipoCromo.Trim(),
                 IsNumbered = dto.IsNumbered,
                 Numbering = dto.IsNumbered ? dto.Numbering!.Trim() : null,
                 AuctionEndTime = dto.AuctionEndTime
@@ -215,18 +226,89 @@ namespace RadafraApp.Controllers
             product.StartingPrice = dto.StartingPrice;
             product.Publisher = dto.Publisher.Trim();
             product.Collection = dto.Collection.Trim();
+            product.Equipo = dto.Equipo.Trim();
+            product.TipoCromo = dto.TipoCromo.Trim();
             product.IsNumbered = dto.IsNumbered;
             product.Numbering = dto.IsNumbered ? dto.Numbering!.Trim() : null;
             product.AuctionEndTime = dto.AuctionEndTime;
 
             await _db.SaveChangesAsync();
 
-            var highest = await _db.Bids
+            var winningBid = await _db.Bids
                 .Where(b => b.ProductId == id)
-                .MaxAsync(b => (decimal?)b.Amount);
+                .OrderByDescending(b => b.Amount)
+                .ThenByDescending(b => b.CreatedAt)
+                .Select(b => new { b.Amount, b.Phone })
+                .FirstOrDefaultAsync();
             var bidCount = await _db.Bids.CountAsync(b => b.ProductId == id);
 
-            return Ok(ToDto(product, highest ?? product.StartingPrice, bidCount));
+            return Ok(ToDto(product, winningBid?.Amount ?? product.StartingPrice, bidCount, winningBid?.Phone));
+        }
+
+        [HttpPut("{id:int}/fulfillment")]
+        public async Task<IActionResult> UpdateFulfillment(int id, [FromBody] UpdateProductFulfillmentDto dto)
+        {
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product is null)
+            {
+                return NotFound();
+            }
+
+            if (product.AuctionEndTime > DateTimeOffset.UtcNow)
+            {
+                return BadRequest("El estado solo se puede editar cuando la subasta ha finalizado.");
+            }
+
+            var hasBids = await _db.Bids.AnyAsync(b => b.ProductId == id);
+            if (!hasBids)
+            {
+                return BadRequest("El estado solo se puede editar si la subasta ha recibido pujas.");
+            }
+
+            product.Pagado = dto.Pagado;
+            product.Enviado = dto.Enviado;
+            await _db.SaveChangesAsync();
+
+            return Ok(new { product.Pagado, product.Enviado });
+        }
+
+        [HttpPut("{id:int}/reactivate")]
+        public async Task<ActionResult<ProductDto>> Reactivate(int id, [FromBody] ReactivateProductDto dto)
+        {
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product is null)
+            {
+                return NotFound();
+            }
+
+            if (product.AuctionEndTime > DateTimeOffset.UtcNow)
+            {
+                return BadRequest("Solo se pueden reactivar subastas finalizadas.");
+            }
+
+            var hasBids = await _db.Bids.AnyAsync(b => b.ProductId == id);
+            if (hasBids)
+            {
+                return BadRequest("No se puede reactivar una subasta que ya ha recibido pujas.");
+            }
+
+            if (dto.AuctionEndTime <= DateTimeOffset.UtcNow)
+            {
+                ModelState.AddModelError(nameof(dto.AuctionEndTime), "La nueva fecha debe ser futura.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            product.StartingPrice = dto.StartingPrice;
+            product.AuctionEndTime = dto.AuctionEndTime;
+            product.Pagado = false;
+            product.Enviado = false;
+            await _db.SaveChangesAsync();
+
+            return Ok(ToDto(product, product.StartingPrice, 0));
         }
 
         [HttpDelete("{id:int}")]
@@ -289,14 +371,19 @@ namespace RadafraApp.Controllers
             StartingPrice = v.StartingPrice,
             CurrentPrice = v.CurrentPrice,
             BidCount = v.BidCount,
+            WinnerPhone = v.WinnerPhone,
             Publisher = v.Publisher,
             Collection = v.Collection,
+            Equipo = v.Equipo,
+            TipoCromo = v.TipoCromo,
             IsNumbered = v.IsNumbered,
             Numbering = v.Numbering,
+            Pagado = v.Pagado,
+            Enviado = v.Enviado,
             AuctionEndTime = v.AuctionEndTime
         };
 
-        private static ProductDto ToDto(Product p, decimal currentPrice, int bidCount) => new()
+        private static ProductDto ToDto(Product p, decimal currentPrice, int bidCount, string? winnerPhone = null) => new()
         {
             Id = p.Id,
             Name = p.Name,
@@ -305,10 +392,15 @@ namespace RadafraApp.Controllers
             StartingPrice = p.StartingPrice,
             CurrentPrice = currentPrice,
             BidCount = bidCount,
+            WinnerPhone = winnerPhone,
             Publisher = p.Publisher,
             Collection = p.Collection,
+            Equipo = p.Equipo,
+            TipoCromo = p.TipoCromo,
             IsNumbered = p.IsNumbered,
             Numbering = p.Numbering,
+            Pagado = p.Pagado,
+            Enviado = p.Enviado,
             AuctionEndTime = p.AuctionEndTime
         };
 
@@ -321,10 +413,15 @@ namespace RadafraApp.Controllers
             public decimal StartingPrice { get; set; }
             public decimal CurrentPrice { get; set; }
             public int BidCount { get; set; }
+            public string? WinnerPhone { get; set; }
             public string Publisher { get; set; } = string.Empty;
             public string Collection { get; set; } = string.Empty;
+            public string Equipo { get; set; } = string.Empty;
+            public string TipoCromo { get; set; } = string.Empty;
             public bool IsNumbered { get; set; }
             public string? Numbering { get; set; }
+            public bool Pagado { get; set; }
+            public bool Enviado { get; set; }
             public DateTimeOffset AuctionEndTime { get; set; }
         }
     }

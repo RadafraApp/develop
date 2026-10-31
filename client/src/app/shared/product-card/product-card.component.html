@@ -33,6 +33,8 @@
   <div class="body">
     <h2 class="name">{{ product.name }}</h2>
     <p class="meta">{{ product.publisher }} · {{ product.collection }}</p>
+    <p class="meta">Equipo: {{ product.equipo }}</p>
+    <p class="meta">Tipo de cromo: {{ product.tipoCromo }}</p>
     @if (product.isNumbered && product.numbering) {
       <p class="meta">Numerada: {{ product.numbering }}</p>
     }

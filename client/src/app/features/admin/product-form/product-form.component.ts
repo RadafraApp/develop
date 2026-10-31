@@ -40,6 +40,8 @@ export class ProductFormComponent {
     startingPrice: [null as number | null, [Validators.required, Validators.min(0), twoDecimalNumber]],
     publisher: ['', [Validators.required, Validators.maxLength(200)]],
     collection: ['', [Validators.required, Validators.maxLength(200)]],
+    equipo: ['', [Validators.required, Validators.maxLength(200)]],
+    tipoCromo: ['', [Validators.required, Validators.maxLength(200)]],
     isNumbered: [false],
     numbering: ['', [Validators.maxLength(100)]],
     auctionEndTime: ['', [Validators.required]],
@@ -106,6 +108,8 @@ export class ProductFormComponent {
     formData.append('startingPrice', String(value.startingPrice).trim().replace(',', '.'));
     formData.append('publisher', value.publisher!.trim());
     formData.append('collection', value.collection!.trim());
+    formData.append('equipo', value.equipo!.trim());
+    formData.append('tipoCromo', value.tipoCromo!.trim());
     formData.append('isNumbered', String(value.isNumbered));
     if (value.isNumbered && value.numbering) {
       formData.append('numbering', value.numbering.trim());
@@ -190,6 +194,8 @@ export class ProductFormComponent {
           startingPrice: product.startingPrice,
           publisher: product.publisher,
           collection: product.collection,
+          equipo: product.equipo,
+          tipoCromo: product.tipoCromo,
           isNumbered: product.isNumbered,
           numbering: product.numbering ?? '',
           auctionEndTime: this.toLocalInputValue(product.auctionEndTime),
@@ -224,6 +230,8 @@ export class ProductFormComponent {
       startingPrice: null,
       publisher: '',
       collection: '',
+      equipo: '',
+      tipoCromo: '',
       isNumbered: false,
       numbering: '',
       auctionEndTime: '',

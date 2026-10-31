@@ -9,18 +9,33 @@
   }
 
   <div class="search-row">
-    <app-auction-search [hideEnded]="true" (selected)="onSearch($event)" />
+    <app-auction-search
+      [hideEnded]="true"
+      (queryChange)="onFilterInput($event)"
+      (selected)="onSearch($event)"
+    />
 
     @if (filter().trim()) {
       <button type="button" class="clear-filter" (click)="clearFilter()">
         Limpiar búsqueda ({{ filter().trim() }})
       </button>
     }
+
+    <label class="numbered-toggle">
+      <input
+        type="checkbox"
+        [checked]="onlyNumbered()"
+        (change)="onNumberedToggle($any($event.target).checked)"
+      />
+      <span class="toggle-switch" aria-hidden="true"></span>
+      <span>Solo numeradas</span>
+    </label>
   </div>
 
   <app-product-grid
     [biddable]="true"
     [hideEnded]="true"
+    [onlyNumbered]="onlyNumbered()"
     [filter]="filter()"
     (bid)="onBid($event)"
   />

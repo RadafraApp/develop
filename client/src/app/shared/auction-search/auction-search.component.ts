@@ -15,6 +15,7 @@ export class AuctionSearchComponent {
 
   @Input() hideEnded = false;
   @Output() selected = new EventEmitter<Product>();
+  @Output() queryChange = new EventEmitter<string>();
 
   readonly query = signal('');
   readonly open = signal(false);
@@ -30,7 +31,11 @@ export class AuctionSearchComponent {
     const items = this.hideEnded ? this.products().filter((p) => !this.isEnded(p)) : this.products();
 
     return items
-      .filter((product) => normalizeText(product.name).includes(needle))
+      .filter((product) =>
+        [product.name, product.equipo, product.collection, product.tipoCromo].some((value) =>
+          normalizeText(value ?? '').includes(needle),
+        ),
+      )
       .slice(0, 8)
       .map((product) => ({ product, segments: splitMatch(product.name, needle) }));
   });
@@ -43,6 +48,7 @@ export class AuctionSearchComponent {
 
   onInput(value: string): void {
     this.query.set(value);
+    this.queryChange.emit(value);
     this.open.set(true);
     this.activeIndex.set(0);
   }
@@ -85,8 +91,16 @@ export class AuctionSearchComponent {
 
   choose(product: Product): void {
     this.query.set(product.name);
+    this.queryChange.emit(product.name);
     this.open.set(false);
     this.selected.emit(product);
+  }
+
+  clear(): void {
+    this.query.set('');
+    this.queryChange.emit('');
+    this.open.set(false);
+    this.activeIndex.set(0);
   }
 
   @HostListener('document:click', ['$event'])

@@ -68,6 +68,14 @@ namespace RadafraApp.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<bool>("Enviado")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Equipo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("ImageContentType")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -94,6 +102,9 @@ namespace RadafraApp.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("Pagado")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Publisher")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -102,6 +113,11 @@ namespace RadafraApp.Data.Migrations
                     b.Property<decimal>("StartingPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("TipoCromo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ThumbnailContentType")
                         .HasMaxLength(100)

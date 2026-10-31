@@ -6,6 +6,10 @@
     </div>
   </header>
 
+  @if (successMessage()) {
+    <p class="success-message">{{ successMessage() }}</p>
+  }
+
   @if (loading()) {
     <p class="state">Cargando subastas…</p>
   } @else if (error()) {
@@ -16,22 +20,63 @@
   } @else if (products().length === 0) {
     <p class="state">No hay subastas finalizadas.</p>
   } @else {
-    <div class="table-wrap">
-      <table class="ended">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Foto</th>
-            <th>Colección</th>
-            <th class="num">Puja final</th>
-            <th class="num">Pujas</th>
-            <th>Finalizó</th>
-            <th class="actions">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (product of products(); track product.id) {
+    @if (actionError()) {
+      <p class="state state-error">{{ actionError() }}</p>
+    }
+    <div class="auction-filter-toggles" role="group" aria-label="Filtrar subastas finalizadas">
+      <label class="auction-filter-toggle">
+        <input
+          type="checkbox"
+          [checked]="bidFilter() === 'without-bids'"
+          (change)="toggleBidFilter('without-bids', $any($event.target).checked)"
+        />
+        <span class="auction-filter-track" aria-hidden="true"></span>
+        <span>Sin pujas</span>
+      </label>
+      <label class="auction-filter-toggle">
+        <input
+          type="checkbox"
+          [checked]="bidFilter() === 'with-winner'"
+          (change)="toggleBidFilter('with-winner', $any($event.target).checked)"
+        />
+        <span class="auction-filter-track" aria-hidden="true"></span>
+        <span>Con ganador</span>
+      </label>
+    </div>
+
+    @if (visibleProducts().length === 0) {
+      <p class="state">
+        @if (bidFilter() === 'without-bids') {
+          No hay subastas finalizadas sin pujas.
+        } @else {
+          No hay subastas finalizadas con ganador.
+        }
+      </p>
+    } @else {
+      <div class="table-wrap">
+        <table class="ended">
+          <thead>
             <tr>
+              <th>Producto</th>
+              <th>Foto</th>
+              <th>Colección</th>
+              <th>Equipo</th>
+              <th>Tipo de cromo</th>
+              @if (hasProductsWithBids()) {
+                <th>Pagado</th>
+                <th>Enviado</th>
+                <th>Editar estado</th>
+              }
+              <th class="num">Puja final</th>
+              <th class="num">Pujas</th>
+              <th>Teléfono ganador</th>
+              <th>Finalizó</th>
+              <th class="actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of visibleProducts(); track product.id) {
+              <tr>
               <td class="name">{{ product.name }}</td>
               <td>
                 <img
@@ -42,10 +87,71 @@
                 />
               </td>
               <td>{{ product.publisher }} · {{ product.collection }}</td>
+              <td>{{ product.equipo }}</td>
+              <td>{{ product.tipoCromo }}</td>
+              @if (hasProductsWithBids()) {
+                @if (product.bidCount > 0) {
+                  @if (editingFulfillmentId() === product.id) {
+                    <td>
+                      <input
+                        type="checkbox"
+                        aria-label="Pagado"
+                        [checked]="pagadoDraft()"
+                        [disabled]="savingFulfillmentId() === product.id"
+                        (change)="pagadoDraft.set($any($event.target).checked)"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        aria-label="Enviado"
+                        [checked]="enviadoDraft()"
+                        [disabled]="savingFulfillmentId() === product.id"
+                        (change)="enviadoDraft.set($any($event.target).checked)"
+                      />
+                    </td>
+                    <td class="status-actions">
+                      <button
+                        type="button"
+                        class="btn-save"
+                        [disabled]="savingFulfillmentId() === product.id"
+                        (click)="saveFulfillment(product)"
+                      >
+                        {{ savingFulfillmentId() === product.id ? 'Guardando…' : 'Guardar' }}
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-cancel"
+                        [disabled]="savingFulfillmentId() === product.id"
+                        (click)="cancelFulfillmentEdit()"
+                      >
+                        Cancelar
+                      </button>
+                    </td>
+                  } @else {
+                    <td>{{ product.pagado ? 'Sí' : 'No' }}</td>
+                    <td>{{ product.enviado ? 'Sí' : 'No' }}</td>
+                    <td class="status-actions">
+                      <button type="button" class="btn-edit-status" (click)="editFulfillment(product)">
+                        Editar
+                      </button>
+                    </td>
+                  }
+                } @else {
+                  <td colspan="3" class="no-bids">Sin pujas</td>
+                }
+              }
               <td class="num">{{ product.currentPrice | currency: 'EUR' }}</td>
               <td class="num">{{ product.bidCount }}</td>
+              <td>{{ product.bidCount > 0 ? product.winnerPhone || '—' : '—' }}</td>
               <td>{{ product.auctionEndTime | date: 'short' }}</td>
               <td class="actions">
+                @if (product.bidCount === 0) {
+                  <button type="button" class="btn-reactivate" (click)="startReactivation(product)">
+                    Reactivar
+                  </button>
+                }
+
                 @if (confirmingId() === product.id) {
                   <span class="confirm">
                     <button
@@ -64,10 +170,77 @@
                   </button>
                 }
               </td>
-            </tr>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (reactivatingProduct(); as product) {
+    <div class="modal-backdrop" (click)="onReactivationBackdrop($event)">
+      <section
+        class="reactivation-modal"
+        role="dialog"
+        aria-modal="true"
+        tabindex="0"
+        [attr.aria-label]="'Reactivar ' + product.name"
+        (keydown.escape)="cancelReactivation()"
+      >
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Cerrar"
+          [disabled]="savingReactivationId() === product.id"
+          (click)="cancelReactivation()"
+        >
+          ×
+        </button>
+
+        <h2>Reactivar «{{ product.name }}»</h2>
+        <p class="modal-description">Indica el nuevo precio inicial y cuándo finalizará la subasta.</p>
+
+        <form class="reactivation-form" (submit)="$event.preventDefault(); saveReactivation(product)" novalidate>
+          <label for="reactivationPrice">Nuevo precio inicial (€)</label>
+          <input
+            id="reactivationPrice"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            [value]="reactivationPrice()"
+            [disabled]="savingReactivationId() === product.id"
+            (input)="reactivationPrice.set($any($event.target).value)"
+          />
+
+          <label for="reactivationEndTime">Nueva fecha de fin</label>
+          <input
+            id="reactivationEndTime"
+            type="datetime-local"
+            [value]="reactivationEndTime()"
+            [disabled]="savingReactivationId() === product.id"
+            (input)="reactivationEndTime.set($any($event.target).value)"
+          />
+
+          @if (reactivationError(); as error) {
+            <p class="reactivation-error">{{ error }}</p>
           }
-        </tbody>
-      </table>
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="modal-cancel"
+              [disabled]="savingReactivationId() === product.id"
+              (click)="cancelReactivation()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="modal-confirm" [disabled]="savingReactivationId() === product.id">
+              {{ savingReactivationId() === product.id ? 'Guardando…' : 'Reactivar subasta' }}
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
   }
 </section>

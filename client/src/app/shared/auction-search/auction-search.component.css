@@ -95,9 +95,13 @@
 }
 
 .option-meta {
-  flex: none;
+  flex: 0 1 50%;
+  overflow: hidden;
   font-size: 0.78rem;
   color: #6b7280;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .visually-hidden {

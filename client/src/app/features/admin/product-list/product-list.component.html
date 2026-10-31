@@ -7,7 +7,7 @@
     <a class="btn-primary" routerLink="/admin/products/new">Nuevo producto</a>
   </header>
 
-  <app-product-grid [editable]="true" (viewBids)="onViewBids($event)" />
+  <app-product-grid [editable]="true" [hideEnded]="true" (viewBids)="onViewBids($event)" />
 
   @if (bidsTarget(); as target) {
     <app-bids-dialog [product]="target" (closed)="onBidsClosed()" (changed)="onBidsChanged()" />

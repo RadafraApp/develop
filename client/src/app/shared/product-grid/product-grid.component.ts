@@ -18,6 +18,16 @@ export class ProductGridComponent {
   @Input() biddable = false;
   @Input() hideEnded = false;
   @Input() onlyEnded = false;
+  private readonly onlyNumberedValue = signal(false);
+
+  @Input()
+  set onlyNumbered(value: boolean) {
+    this.onlyNumberedValue.set(value);
+  }
+
+  get onlyNumbered(): boolean {
+    return this.onlyNumberedValue();
+  }
 
   private readonly filterValue = signal('');
 
@@ -50,10 +60,15 @@ export class ProductGridComponent {
       if (this.hideEnded && this.isEnded(product)) {
         return false;
       }
+      if (this.onlyNumberedValue() && !product.isNumbered) {
+        return false;
+      }
       if (!needle) {
         return true;
       }
-      return normalizeText(product.name).includes(needle);
+      return [product.name, product.equipo, product.collection, product.tipoCromo].some((value) =>
+        normalizeText(value ?? '').includes(needle),
+      );
     });
 
     return filtered;

@@ -27,6 +27,17 @@ export class ProductService {
     return this.http.put<Product>(`${this.baseUrl}/${id}`, formData);
   }
 
+  updateFulfillment(id: number, pagado: boolean, enviado: boolean): Observable<{ pagado: boolean; enviado: boolean }> {
+    return this.http.put<{ pagado: boolean; enviado: boolean }>(`${this.baseUrl}/${id}/fulfillment`, {
+      pagado,
+      enviado,
+    });
+  }
+
+  reactivateProduct(id: number, startingPrice: number, auctionEndTime: string): Observable<Product> {
+    return this.http.put<Product>(`${this.baseUrl}/${id}/reactivate`, { startingPrice, auctionEndTime });
+  }
+
   deleteProduct(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

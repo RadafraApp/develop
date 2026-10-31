@@ -13,6 +13,8 @@
   <p class="state">
     @if (filter.trim()) {
       No hay subastas que coincidan con «{{ filter.trim() }}».
+    } @else if (onlyNumbered) {
+      No hay productos numerados en subasta.
     } @else if (onlyEnded) {
       No hay subastas finalizadas.
     } @else if (hideEnded) {

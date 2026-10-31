@@ -14,10 +14,16 @@ import { ProductGridComponent } from '../../shared/product-grid/product-grid.com
 })
 export class HomeComponent {
   @ViewChild(ProductGridComponent) private grid?: ProductGridComponent;
+  @ViewChild(AuctionSearchComponent) private search?: AuctionSearchComponent;
 
   readonly notice = signal<string | null>(null);
   readonly bidTarget = signal<Product | null>(null);
   readonly filter = signal('');
+  readonly onlyNumbered = signal(false);
+
+  onNumberedToggle(enabled: boolean): void {
+    this.onlyNumbered.set(enabled);
+  }
 
   onSearch(product: Product): void {
     this.filter.set(product.name);
@@ -29,6 +35,7 @@ export class HomeComponent {
 
   clearFilter(): void {
     this.filter.set('');
+    this.search?.clear();
   }
 
   onBid(product: Product): void {

@@ -73,6 +73,22 @@
       </div>
 
       <div class="field">
+        <label for="equipo">Equipo</label>
+        <input id="equipo" type="text" formControlName="equipo" maxlength="200" autocomplete="off" />
+        @if (controlError('equipo'); as error) {
+          <span class="error">{{ error }}</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="tipoCromo">Tipo de cromo</label>
+        <input id="tipoCromo" type="text" formControlName="tipoCromo" maxlength="200" autocomplete="off" />
+        @if (controlError('tipoCromo'); as error) {
+          <span class="error">{{ error }}</span>
+        }
+      </div>
+
+      <div class="field">
         <label class="checkbox">
           <input type="checkbox" formControlName="isNumbered" />
           <span>Es numerada</span>

@@ -1,5 +1,5 @@
 <div class="search">
-  <label class="visually-hidden" for="auctionSearch">Buscar subastas</label>
+  <label class="visually-hidden" for="auctionSearch">Buscar por nombre, equipo o colección</label>
 
   <div class="search-field">
     <svg
@@ -25,7 +25,7 @@
       aria-expanded="false"
       aria-controls="auctionSearchListbox"
       aria-autocomplete="list"
-      placeholder="Busca una subasta por su título…"
+      placeholder="Busca por nombre, equipo o colección…"
       [value]="query()"
       (input)="onInput($any($event.target).value)"
       (focus)="onFocus()"
@@ -54,7 +54,9 @@
               }
             }
           </span>
-          <span class="option-meta">{{ item.product.collection }}</span>
+          <span class="option-meta">
+            {{ item.product.equipo }} · {{ item.product.collection }} · {{ item.product.tipoCromo }}
+          </span>
         </li>
       }
     </ul>
