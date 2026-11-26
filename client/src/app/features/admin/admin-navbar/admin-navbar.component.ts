@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AdminAuthService } from '../../../core/services/admin-auth.service';
 
@@ -11,10 +11,9 @@ import { AdminAuthService } from '../../../core/services/admin-auth.service';
 })
 export class AdminNavbarComponent {
   private readonly auth = inject(AdminAuthService);
-  private readonly router = inject(Router);
 
   logout(): void {
     this.auth.logout();
-    void this.router.navigateByUrl('/');
+    window.location.assign('/');
   }
 }

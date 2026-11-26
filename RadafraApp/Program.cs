@@ -51,6 +51,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseRequestLocalization();
 
+// Ensure the SPA shell is revalidated after deployments so direct routes such as
+// /admin do not keep an older index.html while the public route has been updated.
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        if (context.Response.ContentType?.StartsWith("text/html", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+        }
+
+        return Task.CompletedTask;
+    });
+
+    await next();
+});
+
 // The host (Render) terminates TLS, so only redirect in local development.
 if (app.Environment.IsDevelopment())
 {
