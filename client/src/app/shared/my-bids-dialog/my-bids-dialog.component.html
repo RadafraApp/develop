@@ -14,6 +14,17 @@
     } @else if (bids().length === 0) {
       <p class="state">No se han encontrado pujas para este teléfono.</p>
     } @else {
+      <div class="totals" aria-label="Resumen de ganancias">
+        <div class="total-card">
+          <span>Total que vas ganando</span>
+          <strong>{{ currentWinningsTotal() | currency: 'EUR' }}</strong>
+        </div>
+        <div class="total-card total-card-won">
+          <span>Total que ya has ganado</span>
+          <strong>{{ endedWinningsTotal() | currency: 'EUR' }}</strong>
+        </div>
+      </div>
+
       <section class="group">
         <h3>Subastas en curso</h3>
 

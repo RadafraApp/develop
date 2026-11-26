@@ -13,5 +13,7 @@ namespace RadafraApp.Contracts
         public decimal Amount { get; set; }
 
         public DateTimeOffset AuctionEndTime { get; set; }
+
+        public bool IsWinningBid { get; set; }
     }
 }

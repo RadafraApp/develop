@@ -25,6 +25,16 @@ export class MyBidsDialogComponent implements OnInit {
 
   readonly activeBids = computed(() => this.bids().filter((bid) => !this.isEnded(bid)));
   readonly endedBids = computed(() => this.bids().filter((bid) => this.isEnded(bid)));
+  readonly currentWinningsTotal = computed(() =>
+    this.activeBids()
+      .filter((bid) => bid.isWinningBid)
+      .reduce((total, bid) => total + bid.amount, 0),
+  );
+  readonly endedWinningsTotal = computed(() =>
+    this.endedBids()
+      .filter((bid) => bid.isWinningBid)
+      .reduce((total, bid) => total + bid.amount, 0),
+  );
 
   readonly activePage = signal(1);
   readonly endedPage = signal(1);

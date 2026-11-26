@@ -45,7 +45,12 @@ namespace RadafraApp.Controllers
                     p.Name,
                     HasImage = p.ImageData != null,
                     p.ImageUpdatedAt,
-                    p.AuctionEndTime
+                    p.AuctionEndTime,
+                    WinningPhone = p.Bids
+                        .OrderByDescending(b => b.Amount)
+                        .ThenByDescending(b => b.CreatedAt)
+                        .Select(b => b.Phone)
+                        .FirstOrDefault()
                 })
                 .AsNoTracking()
                 .ToListAsync();
@@ -65,7 +70,9 @@ namespace RadafraApp.Controllers
                         ImagePath = ImageUrl(product.Id, product.HasImage, product.ImageUpdatedAt),
                         ThumbnailPath = ThumbnailUrl(product.Id, product.HasImage, product.ImageUpdatedAt),
                         Amount = g.Max(b => b.Amount),
-                        AuctionEndTime = product.AuctionEndTime
+                        AuctionEndTime = product.AuctionEndTime,
+                        IsWinningBid = product.WinningPhone is not null &&
+                            NormalizePhoneDigits(product.WinningPhone) == digits
                     };
                 })
                 .OrderByDescending(x => x.Amount)
@@ -80,6 +87,9 @@ namespace RadafraApp.Controllers
 
         private static string ThumbnailUrl(int id, bool hasImage, DateTimeOffset? updatedAt) =>
             hasImage ? $"/api/products/{id}/thumbnail?v={updatedAt?.ToUnixTimeMilliseconds() ?? 0}" : string.Empty;
+
+        private static string NormalizePhoneDigits(string phone) =>
+            new(phone.Where(char.IsDigit).ToArray());
 
         private static bool TryNormalize(string? phone, out string digits, out string? error)
         {

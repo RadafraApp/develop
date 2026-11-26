@@ -5,4 +5,5 @@ export interface PhoneBid {
   thumbnailPath: string;
   amount: number;
   auctionEndTime: string;
+  isWinningBid: boolean;
 }
